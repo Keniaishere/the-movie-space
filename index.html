@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Movie Space</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css?v=55" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="script.js?v=50"></script>
+  </head>
+  <body>
+    <main class="movie-space" aria-label="The Movie Space animated map">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="Reload The Movie Space home page">
+          <span class="brand-mark">
+            <svg class="brand-planet" viewBox="0 0 88 56" role="img" aria-hidden="true" focusable="false">
+              <ellipse class="brand-planet-body" cx="44" cy="28" rx="20" ry="17" />
+              <path class="brand-planet-ring brand-planet-ring-back" d="M10 34c9-10 57-20 68-12" />
+              <path class="brand-planet-ring brand-planet-ring-front" d="M10 34c12 9 57 2 68-12" />
+              <path class="brand-planet-band" d="M28 34c9 3 23 2 32-3" />
+              <circle class="brand-planet-moon" cx="74" cy="11" r="2.4" />
+              <text x="44" y="33" text-anchor="middle">MS</text>
+            </svg>
+          </span>
+          <span class="brand-name">The Movie Space</span>
+        </a>
+
+        <nav class="nav" aria-label="Primary navigation">
+          <button class="learn-open" type="button" aria-controls="aboutPanel" aria-expanded="false">About</button>
+          <span class="map-mode-controls" aria-label="Map navigation">
+            <a class="map-mode-control is-active" href="#rating-map" aria-current="page">Orbit</a>
+            <a class="map-mode-control" href="#emotional-map">Galaxy</a>
+          </span>
+          <button class="filter-open" type="button" aria-controls="filterPanel" aria-expanded="false">Filters</button>
+          <div class="movie-search">
+            <button class="icon-button search-open" type="button" aria-label="Search movies" aria-expanded="false">
+              <span class="search-icon" aria-hidden="true"></span>
+            </button>
+            <div class="search-panel" hidden>
+              <label class="search-field">
+                <input class="search-input" type="search" placeholder="Search movies" autocomplete="off" role="combobox" aria-label="Search movies by title" aria-controls="searchResults" aria-expanded="false" aria-autocomplete="list" />
+              </label>
+              <ul class="search-results" id="searchResults" role="listbox"></ul>
+              <p class="search-empty" hidden>No movies found</p>
+              <p class="search-status" role="status" aria-live="polite"></p>
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      <div class="active-filter-chips">
+        <div class="selected-filter-chips" aria-label="Active filters"></div>
+        <div class="person-filter" hidden>
+          <span class="person-filter-label"></span>
+          <button class="person-filter-clear" type="button" aria-label="Remove person filter">×</button>
+        </div>
+        <div class="movie-focus-filter" hidden>
+          <span class="movie-focus-label"></span>
+          <button class="movie-focus-clear" type="button" aria-label="Remove focused movie">×</button>
+        </div>
+      </div>
+
+      <section class="orbit-stage" aria-label="Orbit movie rating visualization">
+        <canvas class="space-canvas" tabindex="0" aria-label="Interactive 3D movie rating space"></canvas>
+        <p class="data-status" role="status" hidden>Loading movie data...</p>
+        <section class="rating-filter-popover" aria-label="IMDb rating filter" hidden>
+          <header>
+            <div>
+              <span class="rating-filter-kicker">IMDb filter</span>
+              <h2>Choose a rating range</h2>
+            </div>
+            <button class="rating-filter-close" type="button" aria-label="Close rating filter">×</button>
+          </header>
+          <div class="rating-filter-values" aria-live="polite">
+            <output class="rating-min-output" for="ratingMin">1.0</output>
+            <span>to</span>
+            <output class="rating-max-output" for="ratingMax">10.0</output>
+          </div>
+          <div class="rating-range-control">
+            <div class="rating-range-track" aria-hidden="true"></div>
+            <input id="ratingMin" class="rating-range rating-range-min" type="range" min="1" max="10" step="0.1" value="1" aria-label="Minimum IMDb rating" />
+            <input id="ratingMax" class="rating-range rating-range-max" type="range" min="1" max="10" step="0.1" value="10" aria-label="Maximum IMDb rating" />
+          </div>
+          <div class="rating-range-limits" aria-hidden="true"><span>1.0</span><span>10.0</span></div>
+          <footer>
+            <span class="rating-filter-result">All ratings</span>
+            <button class="rating-filter-clear" type="button">Clear filter</button>
+          </footer>
+        </section>
+      </section>
+
+      <section class="emotion-stage" aria-label="Galaxy emotional movie visualization" hidden>
+        <div class="emotion-map-shell">
+          <canvas
+            class="emotion-canvas"
+            tabindex="0"
+            aria-label="Interactive map of movies grouped by audience emotions"
+          ></canvas>
+          <div class="emotion-anchor-layer" aria-label="Emotion regions"></div>
+          <div class="emotion-map-tools" aria-label="Galaxy zoom controls">
+            <button class="emotion-zoom-control emotion-zoom-in" type="button" aria-label="Zoom in">
+              <span class="emotion-zoom-lens" aria-hidden="true"><span>+</span></span>
+            </button>
+            <button class="emotion-zoom-control emotion-zoom-out" type="button" aria-label="Zoom out">
+              <span class="emotion-zoom-lens" aria-hidden="true"><span>−</span></span>
+            </button>
+          </div>
+          <div class="emotion-tooltip" role="status" hidden></div>
+          <p class="emotion-status" role="status">Loading emotional profiles…</p>
+        </div>
+
+        <footer class="emotion-legend" aria-label="Emotion color legend"></footer>
+      </section>
+
+      <section class="timeline" aria-label="Timeline controls">
+        <div class="timeline-row">
+          <span class="timeline-min">1930</span>
+          <div class="slider-control">
+            <input
+              id="yearSlider"
+              type="range"
+              min="1930"
+              max="2018"
+              value="1976"
+              aria-label="Selected year"
+            />
+            <div class="stepper">
+              <button class="year-step year-step-previous" type="button" aria-label="Previous year" title="Previous year" disabled>
+                <svg viewBox="0 0 12 16" aria-hidden="true" focusable="false"><path d="m8 3-5 5 5 5" /></svg>
+              </button>
+              <output class="year-output" for="yearSlider">1976</output>
+              <button class="year-step year-step-next" type="button" aria-label="Next year" title="Next year" disabled>
+                <svg viewBox="0 0 12 16" aria-hidden="true" focusable="false"><path d="m4 3 5 5-5 5" /></svg>
+              </button>
+            </div>
+          </div>
+          <span class="timeline-max">2018</span>
+        </div>
+      </section>
+
+      <div class="filter-overlay" hidden>
+        <section class="filter-dialog" id="filterPanel" role="dialog" aria-modal="false" aria-label="Map filters">
+          <header class="filter-header">
+            <button class="filter-close" type="button" aria-label="Close filters"></button>
+          </header>
+
+          <form class="filter-form">
+            <fieldset class="filter-group genre-group">
+              <legend>Genre</legend>
+              <div class="filter-options genre-options">
+                <label><input type="checkbox" name="genre" value="Action" /> Action</label>
+                <label><input type="checkbox" name="genre" value="Adventure" /> Adventure</label>
+                <label><input type="checkbox" name="genre" value="Animation" /> Animation</label>
+                <label><input type="checkbox" name="genre" value="Anime" /> Anime</label>
+                <label><input type="checkbox" name="genre" value="Biography" /> Biography</label>
+                <label><input type="checkbox" name="genre" value="Comedy" /> Comedy</label>
+                <label><input type="checkbox" name="genre" value="Crime" /> Crime</label>
+                <label><input type="checkbox" name="genre" value="Documentary" /> Documentary</label>
+                <label><input type="checkbox" name="genre" value="Drama" /> Drama</label>
+                <label><input type="checkbox" name="genre" value="Family" /> Family</label>
+                <label><input type="checkbox" name="genre" value="Fantasy" /> Fantasy</label>
+                <label><input type="checkbox" name="genre" value="History" /> History</label>
+                <label><input type="checkbox" name="genre" value="Horror" /> Horror</label>
+                <label><input type="checkbox" name="genre" value="Musical" /> Musical</label>
+                <label><input type="checkbox" name="genre" value="Mystery" /> Mystery</label>
+                <label><input type="checkbox" name="genre" value="Romance" /> Romance</label>
+                <label><input type="checkbox" name="genre" value="Sport" /> Sport</label>
+                <label><input type="checkbox" name="genre" value="Thriller" /> Thriller</label>
+                <label><input type="checkbox" name="genre" value="Western" /> Western</label>
+                <label><input type="checkbox" name="genre" value="War" /> War</label>
+              </div>
+            </fieldset>
+
+            <fieldset class="filter-group duration-group">
+              <legend>Duration</legend>
+              <div class="filter-options duration-options">
+                <label><input type="checkbox" name="duration" value="under90" /> &lt; 90 min.</label>
+                <label><input type="checkbox" name="duration" value="90to150" /> 90 - 150 min.</label>
+                <label><input type="checkbox" name="duration" value="over150" /> &gt; 150 min.</label>
+              </div>
+            </fieldset>
+
+            <fieldset class="filter-group awards-group">
+              <legend>Awards</legend>
+              <div class="filter-options four-options">
+                <label><input type="checkbox" name="award" value="oscar" /> Oscar winners</label>
+                <label><input type="checkbox" name="award" value="festival" /> Festival winners</label>
+                <label><input type="checkbox" disabled /> Cult Classic</label>
+                <label><input type="checkbox" disabled /> Hidden Gem</label>
+              </div>
+            </fieldset>
+
+            <fieldset class="filter-group region-group">
+              <legend>Language / Region</legend>
+              <div class="filter-options region-options">
+                <label><input type="checkbox" name="region" value="hollywood" /> Hollywood</label>
+                <label><input type="checkbox" name="region" value="latin_american" /> Latin American</label>
+                <label><input type="checkbox" name="region" value="european" /> European</label>
+                <label><input type="checkbox" name="region" value="middle_east_african" /> Middle Eastern &amp; African</label>
+                <label><input type="checkbox" name="region" value="asian" /> Asian Cinema</label>
+                <label><input type="checkbox" name="region" value="independent" /> Independent</label>
+              </div>
+            </fieldset>
+          </form>
+
+          <footer class="filter-footer">
+            <span class="filter-count">5872 movies in orbit</span>
+            <button class="filter-clear" type="button">Clear all filters</button>
+          </footer>
+        </section>
+      </div>
+
+      <div class="learn-overlay" hidden>
+        <article class="learn-dialog" id="aboutPanel" role="dialog" aria-modal="false" aria-labelledby="learnLead">
+          <header class="filter-header">
+            <button class="filter-close learn-close" type="button" aria-label="Close About"></button>
+          </header>
+
+          <div class="learn-content">
+            <h3 id="learnLead">So what’s The Movie Space?</h3>
+            <p>
+              The Movie Space is built from a master collection of 5,919 films spanning 1902–2025.
+              The <strong>Orbit</strong> presents 5,872 of them on its 1930–2025 timeline. Each
+              poster sits on a ring that matches its IMDb rating: whole numbers land on the ring,
+              while decimal ratings fall between them.
+            </p>
+            <p>
+              Alongside familiar filters such as genre, runtime, awards, and production region,
+              the <strong>Galaxy</strong> places 4,523 films using language found in audience
+              reviews. A multi-label GoEmotions model groups its full vocabulary into eight disclosed
+              families—love, joy, surprise, anger, fear, disgust, sadness, and neutral—and combines
+              them into valence and arousal coordinates. Love uses lilac; frustration uses burnt orange.
+              These profiles describe patterns in audience response, not objective properties of a film.
+            </p>
+            <p>
+              Review evidence combines available TMDB user reviews with the academic
+              <strong>IMDb Spoiler Dataset</strong> by Rishabh Misra. IMDb reviews are connected to
+              this collection only through exact IMDb title IDs; no title-name guessing is used.
+              For matched films, the analysis uses a representative sample of up to 25 academic IMDb
+              reviews together with available TMDB reviews.
+            </p>
+            <p>
+              Confidence labels primarily reflect review quantity: low means 1–4 reviews, medium
+              means 5–9, and high means 10 or more. They indicate the strength of the available
+              review evidence, not certainty that the model’s interpretation is correct. This product
+              uses the TMDB API but is not endorsed or certified by TMDB, IMDb, or their affiliates.
+            </p>
+          </div>
+        </article>
+      </div>
+
+      <div class="movie-detail-overlay" hidden>
+        <div class="movie-detail-content">
+          <figure class="movie-detail-poster-wrap">
+            <img class="movie-detail-poster" src="" alt="" />
+            <div class="movie-detail-poster-fallback" hidden aria-hidden="true">
+              <strong class="movie-detail-poster-fallback-title"></strong>
+              <span class="movie-detail-poster-fallback-year"></span>
+            </div>
+          </figure>
+
+          <article class="movie-detail-panel" role="dialog" aria-modal="false" aria-labelledby="movieDetailTitle">
+            <div class="movie-detail-title-row">
+              <h2 id="movieDetailTitle"></h2>
+              <div class="movie-detail-actions">
+                <button class="movie-detail-share" type="button" aria-label="Share this movie" title="Share this movie">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5M5 11.5V20h14v-8.5" />
+                  </svg>
+                </button>
+                <button class="filter-close movie-detail-close" type="button" aria-label="Close movie details"></button>
+              </div>
+            </div>
+
+            <div class="movie-detail-facts">
+              <p><strong>IMDb rating:</strong> <span class="movie-detail-rating"></span></p>
+              <p><strong>Year:</strong> <span class="movie-detail-year"></span></p>
+            </div>
+
+            <p class="movie-detail-overview"></p>
+            <div class="movie-detail-genres" aria-label="Genres"></div>
+
+            <section class="movie-emotion-profile" hidden aria-label="Audience emotion profile">
+              <div class="movie-emotion-heading">
+                <h3>Audience emotion profile</h3>
+                <span class="movie-emotion-confidence"></span>
+              </div>
+              <div class="movie-emotion-bars"></div>
+              <p class="movie-emotion-note"></p>
+            </section>
+
+            <dl class="movie-detail-credits">
+              <div>
+                <dt>Director:</dt>
+                <dd class="movie-detail-director"></dd>
+              </div>
+              <div>
+                <dt>Cast:</dt>
+                <dd class="movie-detail-cast"></dd>
+              </div>
+              <div>
+                <dt>Awards:</dt>
+                <dd class="movie-detail-awards"></dd>
+              </div>
+            </dl>
+
+            <section class="movie-related" aria-labelledby="movieRelatedTitle">
+              <div class="movie-related-heading">
+                <p class="dialog-kicker">Continue exploring</p>
+                <h3 id="movieRelatedTitle">Similar orbit</h3>
+              </div>
+              <div class="movie-related-list"></div>
+            </section>
+          </article>
+        </div>
+      </div>
+
+      <button
+        class="theme-toggle"
+        type="button"
+        role="switch"
+        aria-checked="false"
+        aria-label="Switch to day mode"
+      >
+        <span class="moon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" focusable="false">
+            <path d="M18 3C10.5 6.7 6 14 6 22.2 6 33.1 14.9 42 25.8 42 34 42 41.2 37 44 29.6c-3.4 2-7.3 3.1-11.3 3.1-11 0-19.8-8.9-19.8-19.8 0-3.6.9-7 2.7-10 .5-.9 1.6-1.2 2.4-.7Z"></path>
+          </svg>
+        </span>
+        <span class="sun" aria-hidden="true"></span>
+      </button>
+    </main>
+  </body>
+</html>
